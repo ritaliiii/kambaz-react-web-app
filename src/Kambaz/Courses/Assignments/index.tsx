@@ -1,4 +1,3 @@
-import React from "react";
 import { BsPlus } from "react-icons/bs";
 import { FaSearch } from "react-icons/fa";
 import { IoEllipsisVertical } from "react-icons/io5";
