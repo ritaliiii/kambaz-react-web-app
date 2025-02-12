@@ -1,60 +1,35 @@
 import ModulesControls from "./ModulesControls";
 import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
+import { useParams } from "react-router";
+import * as db from "../../Database";
+import { BsGripVertical } from "react-icons/bs";
 
 export default function Modules() {
+  const { cid } = useParams();
+  const modules = db.modules;
   return (
-    <div id="wd-modules" className="list-group rounded-0">
-      <ModulesControls />
-      <br /><br /><br /><br />
+      <div>
+    <ModulesControls /> {/* Controls for managing all modules */}
+    <br /><br /><br />
 
-      {/* Week 1 */}
-      <div className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
-        <div className="d-flex justify-content-between align-items-center">
-          <div className="wd-title p-3 ps-2 bg-secondary">Week 1</div>
-          <ModuleControlButtons />
+    <ul id="wd-modules" className="list-group rounded-0">
+      {modules
+        .filter((module: any) => module.course === cid)
+        .map((module: any) => (
+      <li className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
+        <div className="wd-title p-3 ps-2 bg-secondary">
+          <BsGripVertical className="me-2 fs-3" /> {module.name} <ModuleControlButtons /> {/* Module-specific controls */}
         </div>
-        <ul className="wd-lessons list-group rounded-0">
-          <li className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between">
-            <span>LEARNING OBJECTIVES</span>
-            <LessonControlButtons />
-          </li>
-          <li className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between">
-            <span>Introduction to the course</span>
-            <LessonControlButtons />
-          </li>
-          <li className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between">
-            <span>Learn what is Web Development</span>
-            <LessonControlButtons />
-          </li>
-          <li className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between">
-            <span>LESSON 1</span>
-            <LessonControlButtons />
-          </li>
-        </ul>
-      </div>
 
-      {/* Week 2 */}
-      <div className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
-        <div className="d-flex justify-content-between align-items-center">
-          <div className="wd-title p-3 ps-2 bg-secondary">Week 2</div>
-          <ModuleControlButtons />
-        </div>
+        {module.lessons && (
         <ul className="wd-lessons list-group rounded-0">
-          <li className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between">
-            <span>LEARNING OBJECTIVES</span>
-            <LessonControlButtons />
+          {module.lessons.map((lesson: any) => (
+          <li className="wd-lesson list-group-item p-3 ps-1">
+            <BsGripVertical className="me-2 fs-3" /> {lesson.name}
+            <LessonControlButtons /> {/* Lesson-specific controls */}
           </li>
-          <li className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between">
-            <span>LESSON 1</span>
-            <LessonControlButtons />
-          </li>
-          <li className="wd-lesson list-group-item p-3 ps-1 d-flex justify-content-between">
-            <span>LESSON 2</span>
-            <LessonControlButtons />
-          </li>
-        </ul>
-      </div>
-    </div>
-  );
-}
+          ))}</ul>)}</li>))}</ul>
+          </div>
+          );
+        }

@@ -1,14 +1,25 @@
+import { useParams, Link } from "react-router-dom";
+import * as db from "../../Database";
+
 export default function AssignmentEditor() {
+  const assignments = db.assignments;
+  const { cid, aid } = useParams(); 
+  const assignment = assignments.find((a) => a._id === aid); 
+
+  if (!assignment) {
+    return <div>Assignment not found</div>;
+  }
+
   return (
     <div id="wd-assignments-editor" style={{ padding: "20px" }}>
       {/* Breadcrumb */}
       <nav aria-label="breadcrumb" className="mb-3">
         <ol className="breadcrumb">
           <li className="breadcrumb-item">
-            <a href="#/Kambaz/Courses/1234/Assignments">Assignments</a>
+            <Link to={`/Kambaz/Courses/${cid}/Assignments`}>Assignments</Link>
           </li>
           <li className="breadcrumb-item active" aria-current="page">
-            A1 - ENV + HTML
+            {assignment.title}
           </li>
         </ol>
       </nav>
@@ -26,7 +37,7 @@ export default function AssignmentEditor() {
               id="wd-name"
               type="text"
               className="form-control"
-              defaultValue="A1"
+              defaultValue={assignment.title}
             />
           </div>
         </div>
@@ -43,10 +54,7 @@ export default function AssignmentEditor() {
               id="wd-description"
               className="form-control"
               rows={5}
-              defaultValue="The assignment is available online. Submit a link to the landing page of your Web application running on Netlify. The landing page should include the following:
-- Your full name and section
-- Links to each of the tab assignments
-- Links to relevant source code repositories."
+              defaultValue={assignment.description}
             ></textarea>
           </div>
         </div>
@@ -63,7 +71,7 @@ export default function AssignmentEditor() {
               id="wd-points"
               type="number"
               className="form-control"
-              defaultValue={100}
+              defaultValue={assignment.points}
             />
           </div>
         </div>
@@ -151,25 +159,11 @@ export default function AssignmentEditor() {
           </div>
         </div>
 
-        {/* Assign To */}
-        <div className="row mb-3">
-          <div className="col-md-3">
-            <label htmlFor="wd-assign-to" className="form-label">
-              Assign to
-            </label>
-          </div>
-          <div className="col-md-9">
-            <select id="wd-assign-to" className="form-control">
-              <option value="Everyone">Everyone</option>
-            </select>
-          </div>
-        </div>
-
         {/* Due Date */}
         <div className="row mb-3">
           <div className="col-md-3">
             <label htmlFor="wd-due-date" className="form-label">
-              Due
+              Due Date
             </label>
           </div>
           <div className="col-md-9">
@@ -177,7 +171,7 @@ export default function AssignmentEditor() {
               id="wd-due-date"
               type="datetime-local"
               className="form-control"
-              defaultValue="2024-05-13T23:59"
+              defaultValue={assignment.dueDate}
             />
           </div>
         </div>
@@ -186,7 +180,7 @@ export default function AssignmentEditor() {
         <div className="row mb-3">
           <div className="col-md-3">
             <label htmlFor="wd-available-from" className="form-label">
-              Available from
+              Available From
             </label>
           </div>
           <div className="col-md-9">
@@ -194,32 +188,20 @@ export default function AssignmentEditor() {
               id="wd-available-from"
               type="datetime-local"
               className="form-control"
-              defaultValue="2024-05-06T00:00"
-            />
-          </div>
-        </div>
-
-        {/* Available Until */}
-        <div className="row mb-3">
-          <div className="col-md-3">
-            <label htmlFor="wd-available-until" className="form-label">
-              Until
-            </label>
-          </div>
-          <div className="col-md-9">
-            <input
-              id="wd-available-until"
-              type="datetime-local"
-              className="form-control"
-              defaultValue="2024-05-20T23:59"
+              defaultValue={assignment.availableFrom}
             />
           </div>
         </div>
 
         {/* Buttons */}
         <div className="d-flex justify-content-end">
-          <button className="btn btn-secondary me-2">Cancel</button>
-          <button className="btn btn-success">Save</button>
+          <Link
+            to={`/Kambaz/Courses/${cid}/Assignments`}
+            className="btn btn-secondary me-2"
+          >
+            Cancel
+          </Link>
+          <button type="submit" className="btn btn-success">Save</button>
         </div>
       </form>
     </div>
