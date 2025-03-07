@@ -124,18 +124,22 @@ export default function Assignments() {
                 </div>
                 <div className="d-flex align-items-center">
                   <GreenCheckmark />
-                  <button
-                    className="btn btn-primary me-2"
-                    onClick={() => handleUpdateAssignment(assignment)}
-                  >
-                    <BsPencil />
-                  </button>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDeleteAssignment(assignment._id)}
-                  >
-                    <BsTrash />
-                  </button>
+                  <ProtectedRoute role="FACULTY">
+                    <button
+                      className="btn btn-primary me-2"
+                      onClick={() => handleUpdateAssignment(assignment)}
+                    >
+                      <BsPencil />
+                    </button>
+                  </ProtectedRoute>
+                  <ProtectedRoute role="FACULTY">
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleDeleteAssignment(assignment._id)}
+                    >
+                      <BsTrash />
+                    </button>
+                  </ProtectedRoute>
                 </div>
               </li>
             )
