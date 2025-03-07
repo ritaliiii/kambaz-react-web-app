@@ -23,13 +23,9 @@ export default function AssignmentEditor({
   const [assignmentAvailableFrom, setAssignmentAvailableFrom] = useState(
     assignment?.availableFrom
   );
-  const [assignmentPoints, setAssignmentPoints] = useState(assignment?.points);
-  const [assignmentDueDate, setAssignmentDueDate] = useState(
-    assignment?.dueDate
-  );
-  const [assignmentAvailableUntil, setAssignmentAvailableUntil] = useState(
-    assignment?.availableUntil
-  );
+  const [assignmentPoints] = useState(assignment?.points);
+  const [assignmentDueDate] = useState(assignment?.dueDate);
+  const [assignmentAvailableUntil] = useState(assignment?.availableUntil);
 
   if (!assignment && !createNew) {
     return <div>Assignment not found</div>;
@@ -39,7 +35,7 @@ export default function AssignmentEditor({
     e.preventDefault();
 
     const updatedAssignment = {
-      _id: assignment?._id || new Date().getTime().toString(), // If editing, keep the existing ID. Otherwise, create a new one.
+      _id: assignment?._id || new Date().getTime().toString(),
       title: assignmentName,
       course: cid, // Using course ID from params
       description: assignmentDescription,
