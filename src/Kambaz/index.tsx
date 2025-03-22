@@ -4,18 +4,21 @@ import KambazNavigation from './Navigation';
 import Courses from './Courses';
 import Account from './Account';
 import './styles.css';
-import * as db from './Database';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import store from './store';
 import { Provider } from 'react-redux';
 import ProtectedRoute from './Account/ProtectedRoute';
-import { enrollCourse } from './enrollmentActions';
-import { useDispatch } from 'react-redux';
+// import { enrollCourse } from './enrollmentActions';
+// import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
+import Session from './Account/Session';
+import * as userClient from './Account/client';
+import * as courseClient from './Courses/client';
 
 export default function Kambaz() {
-  const [courses, setCourses] = useState<any[]>(db.courses);
-  const dispatch = useDispatch();
+  const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
+  const [allCourses, setAllCourses] = useState<any[]>([]);
+  // const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const [course, setCourse] = useState<any>({
     _id: '1234',
@@ -25,23 +28,23 @@ export default function Kambaz() {
     endDate: '2023-12-15',
     description: 'New Description',
   });
-  const addNewCourse = () => {
-    const newCourse = {
-      ...course,
-      _id: new Date().getTime().toString(),
-      name: course.name,
-      description: course.description,
-      image: '/images/CS1234.png',
-    };
-    setCourses([...courses, newCourse]);
-    dispatch(enrollCourse(currentUser._id, newCourse._id));
+  const addNewCourse = async () => {
+    const newCourse = await userClient.createCourse(course);
+    setEnrolledCourses([...enrolledCourses, newCourse]);
+    fetchAllCourses();
+    // dispatch(enrollCourse(currentUser._id, newCourse._id));
   };
-  const deleteCourse = (courseId: any) => {
-    setCourses(courses.filter((course) => course._id !== courseId));
+  const deleteCourse = async (courseId: string) => {
+    const status = await courseClient.deleteCourse(courseId);
+    setEnrolledCourses(
+      enrolledCourses.filter((course) => course._id !== courseId)
+    );
+    fetchAllCourses();
   };
-  const updateCourse = () => {
-    setCourses(
-      courses.map((c) => {
+  const updateCourse = async () => {
+    await courseClient.updateCourse(course);
+    setEnrolledCourses(
+      enrolledCourses.map((c) => {
         if (c._id === course._id) {
           return course;
         } else {
@@ -49,38 +52,62 @@ export default function Kambaz() {
         }
       })
     );
+    fetchAllCourses();
   };
-
+  const fetchEnrolledCourses = async () => {
+    try {
+      const enrolledCourses = await userClient.findMyCourses();
+      setEnrolledCourses(enrolledCourses);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const fetchAllCourses = async () => {
+    try {
+      const allCourses = await userClient.findAllCourses();
+      setAllCourses(allCourses);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    fetchEnrolledCourses();
+    fetchAllCourses();
+  }, [currentUser]);
   return (
-    <Provider store={store}>
-      <div id="wd-kambaz">
-        <KambazNavigation />
-        <div className="wd-main-content-offset p-3">
-          <Routes>
-            <Route path="/" element={<Navigate to="Account" />} />
-            <Route path="Account/*" element={<Account />} />
-            <Route
-              path="Dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard
-                    courses={courses}
-                    course={course}
-                    setCourse={setCourse}
-                    addNewCourse={addNewCourse}
-                    deleteCourse={deleteCourse}
-                    updateCourse={updateCourse}
-                  />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="Courses/:cid/*"
-              element={<Courses courses={courses} />}
-            />
-          </Routes>
+    <Session>
+      <Provider store={store}>
+        <div id="wd-kambaz">
+          <KambazNavigation />
+          <div className="wd-main-content-offset p-3">
+            <Routes>
+              <Route path="/" element={<Navigate to="Account" />} />
+              <Route path="Account/*" element={<Account />} />
+              <Route
+                path="Dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard
+                      enrolledCourses={enrolledCourses}
+                      allCourses={allCourses}
+                      course={course}
+                      setCourse={setCourse}
+                      addNewCourse={addNewCourse}
+                      deleteCourse={deleteCourse}
+                      updateCourse={updateCourse}
+                      fetchEnrolledCourses={fetchEnrolledCourses}
+                    />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="Courses/:cid/*"
+                element={<Courses courses={enrolledCourses} />}
+              />
+            </Routes>
+          </div>
         </div>
-      </div>
-    </Provider>
+      </Provider>
+    </Session>
   );
 }

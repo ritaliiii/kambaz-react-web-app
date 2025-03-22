@@ -1,9 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
-import * as db from '../../Database';
 import ProtectedRoute from '../../Account/ProtectedRoute';
-import { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { addAssignment, updateAssignment } from './reducer';
+import { useEffect, useState } from 'react';
+import { createAssignment, findAssignment, updateAssignment } from './client';
 import { useNavigate } from 'react-router-dom';
 
 export default function AssignmentEditor({
@@ -11,33 +9,41 @@ export default function AssignmentEditor({
 }: {
   createNew: boolean;
 }) {
-  const assignments = db.assignments;
   const { cid, aid } = useParams();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const assignment = assignments.find((a) => a._id === aid);
-  const [assignmentName, setAssignmentName] = useState(assignment?.title);
-  const [assignmentDescription, setAssignmentDescription] = useState(
-    assignment?.description
-  );
-  const [assignmentAvailableFrom, setAssignmentAvailableFrom] = useState(
-    assignment?.availableFrom
-  );
-  const [assignmentPoints] = useState(assignment?.points);
-  const [assignmentDueDate] = useState(assignment?.dueDate);
-  const [assignmentAvailableUntil] = useState(assignment?.availableUntil);
+  const [assignmentName, setAssignmentName] = useState('');
+  const [assignmentDescription, setAssignmentDescription] = useState('');
+  const [assignmentAvailableFrom, setAssignmentAvailableFrom] = useState('');
+  const [assignmentPoints, setAssignmentPoints] = useState('');
+  const [assignmentDueDate, setAssignmentDueDate] = useState('');
+  const [assignmentAvailableUntil, setAssignmentAvailableUntil] = useState('');
 
-  if (!assignment && !createNew) {
-    return <div>Assignment not found</div>;
-  }
+  useEffect(() => {
+    const fetchAssignment = async () => {
+      if (!createNew && !!aid) {
+        try {
+          const assignment = await findAssignment(aid);
+          setAssignmentName(assignment?.title);
+          setAssignmentDescription(assignment?.description);
+          setAssignmentAvailableFrom(assignment?.availableFrom);
+          setAssignmentPoints(assignment?.points);
+          setAssignmentDueDate(assignment?.dueDate);
+          setAssignmentAvailableUntil(assignment?.availableUntil);
+        } catch (error) {
+          console.error('Error fetching assignment:', error);
+        }
+      }
+    };
+    fetchAssignment(); // Call the async function
+  }, [createNew, aid]); // Make sure to include all dependencies
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const updatedAssignment = {
-      _id: assignment?._id || new Date().getTime().toString(),
+    const assignment = {
+      _id: aid || new Date().getTime().toString(),
       title: assignmentName,
-      course: cid, // Using course ID from params
+      course: cid,
       description: assignmentDescription,
       points: assignmentPoints,
       availableFrom: assignmentAvailableFrom,
@@ -47,14 +53,14 @@ export default function AssignmentEditor({
 
     // If it's a new assignment, add it to the Redux store
     if (createNew) {
-      dispatch(addAssignment(updatedAssignment));
+      await createAssignment(assignment);
     } else {
       // If editing, update the existing assignment in the Redux store
-      dispatch(updateAssignment(updatedAssignment));
+      await updateAssignment({ ...assignment, _id: aid });
     }
 
     // Navigate back to the Assignments page after saving
-    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+    navigate(`/Kambaz/Courses/${cid}/assignments`);
   };
 
   return (
@@ -65,12 +71,12 @@ export default function AssignmentEditor({
           <nav aria-label="breadcrumb" className="mb-3">
             <ol className="breadcrumb">
               <li className="breadcrumb-item">
-                <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+                <Link to={`/Kambaz/Courses/${cid}/assignments`}>
                   Assignments
                 </Link>
               </li>
               <li className="breadcrumb-item active" aria-current="page">
-                {assignment?.title}
+                {assignmentName || 'New Assignment'}
               </li>
             </ol>
           </nav>
@@ -90,6 +96,7 @@ export default function AssignmentEditor({
                   className="form-control"
                   defaultValue={assignmentName}
                   onChange={(e) => setAssignmentName(e.target.value)}
+                  placeholder="Enter assignment name"
                 />
               </div>
             </div>
@@ -108,6 +115,7 @@ export default function AssignmentEditor({
                   rows={5}
                   defaultValue={assignmentDescription}
                   onChange={(e) => setAssignmentDescription(e.target.value)}
+                  placeholder="Enter assignment description"
                 ></textarea>
               </div>
             </div>
@@ -124,7 +132,9 @@ export default function AssignmentEditor({
                   id="wd-points"
                   type="number"
                   className="form-control"
-                  defaultValue={assignment?.points}
+                  defaultValue={assignmentPoints}
+                  placeholder="Enter points"
+                  onChange={(e) => setAssignmentPoints(e.target.value)}
                 />
               </div>
             </div>
@@ -236,7 +246,8 @@ export default function AssignmentEditor({
                   id="wd-due-date"
                   type="datetime-local"
                   className="form-control"
-                  defaultValue={assignment?.dueDate}
+                  defaultValue={assignmentDueDate}
+                  onChange={(e) => setAssignmentDueDate(e.target.value)}
                 />
               </div>
             </div>
@@ -262,7 +273,7 @@ export default function AssignmentEditor({
             {/* Buttons */}
             <div className="d-flex justify-content-end">
               <Link
-                to={`/Kambaz/Courses/${cid}/Assignments`}
+                to={`/Kambaz/Courses/${cid}/assignments`}
                 className="btn btn-secondary me-2"
               >
                 Cancel

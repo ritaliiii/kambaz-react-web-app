@@ -1,13 +1,18 @@
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { BsPlus, BsPencil, BsTrash } from 'react-icons/bs';
 import { FaSearch } from 'react-icons/fa';
 import GreenCheckmark from '../Modules/GreenCheckmark';
 import ProtectedRoute from '../../Account/ProtectedRoute';
-import { deleteAssignment, updateAssignment } from './reducer';
-import { Modal, Button } from 'react-bootstrap'; // Import Modal and Button from react-bootstrap
-import { useState } from 'react';
+import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import {
+  createAssignment,
+  findAssignmentsForCourse,
+  updateAssignment,
+  deleteAssignment,
+} from './client';
 
 export default function Assignments() {
   type Assignment = {
@@ -21,41 +26,58 @@ export default function Assignments() {
   };
 
   const { cid } = useParams();
-  const dispatch = useDispatch();
-  const { assignments } = useSelector((state: any) => state.assignmentReducer);
-  const assignmentsForThisCourse = assignments.filter(
-    (assignment: any) => assignment.course === cid
-  );
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState<any>(null);
   const navigate = useNavigate();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [assignmentToDelete, setAssignmentToDelete] =
-    useState<Assignment | null>(null);
+  const assignmentsForThisCourse = assignments.filter(
+    (assignment) => assignment.course === cid
+  );
 
-  // Function to handle deleting an assignment
-  const handleDeleteAssignment = (assignmentId: string) => {
-    // Open modal with assignment to delete
-    const assignmentToDelete = assignments.find(
-      (a: Assignment) => a._id === assignmentId
+  // Fetch assignments for the course
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      const assignments = await findAssignmentsForCourse(cid!);
+      setAssignments(assignments);
+    };
+    fetchAssignments();
+  }, [cid]);
+
+  // Handle deleting an assignment
+  const handleDeleteAssignment = async (assignmentId: string) => {
+    await deleteAssignment(assignmentId);
+    setAssignments(assignments.filter((a) => a._id !== assignmentId));
+    setIsModalOpen(false);
+  };
+
+  // Handle updating an assignment
+  const handleUpdateAssignment = async (assignment: any) => {
+    const updatedAssignment = { ...assignment, title: 'Updated Title' };
+    await updateAssignment(updatedAssignment);
+    setAssignments(
+      assignments.map((a) => (a._id === assignment._id ? updatedAssignment : a))
     );
-    if (assignmentToDelete) {
-      setAssignmentToDelete(assignmentToDelete);
-      setIsModalOpen(true);
-    }
   };
-
-  // Function to handle updating an assignment
-  const handleUpdateAssignment = (assignment: Assignment) => {
-    const updatedAssignment = { ...assignment, title: 'Updated Title' }; // Example change
-    dispatch(updateAssignment(updatedAssignment));
-  };
-
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (assignmentToDelete) {
-      // Dispatch delete action
-      dispatch(deleteAssignment(assignmentToDelete));
-      setIsModalOpen(false);
-      navigate(`/Kambaz/Courses/${cid}/Assignments`);
+      try {
+        // Delete the assignment on the server
+        await deleteAssignment(assignmentToDelete._id);
+
+        // Update the local state to remove the deleted assignment
+        const updatedAssignments = assignments.filter(
+          (a: Assignment) => a._id !== assignmentToDelete._id
+        );
+        setAssignments(updatedAssignments);
+
+        // Close the modal and navigate
+        setIsModalOpen(false);
+        navigate(`/Kambaz/Courses/${cid}/Assignments`);
+      } catch (error) {
+        console.error('Failed to delete assignment:', error);
+        // Optionally, show an error message to the user
+      }
     }
   };
 
@@ -100,50 +122,48 @@ export default function Assignments() {
           <span>ASSIGNMENTS</span>
         </h3>
         <ul className="list-group">
-          {assignmentsForThisCourse.map(
-            (assignment: typeof assignmentsForThisCourse) => (
-              <li
-                key={assignment._id}
-                className="list-group-item d-flex justify-content-between align-items-center"
-              >
-                <div>
-                  <h5 className="mb-1">
-                    <Link
-                      to={`/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
-                      className="text-decoration-none text-dark"
-                    >
-                      {assignment.title}
-                    </Link>
-                  </h5>
-                  <p className="text-muted mb-1 small">
-                    Due {assignment.dueDate} | {assignment.points} points
-                  </p>
-                  <p className="text-muted small">
-                    Not available until {assignment.availableFrom}
-                  </p>
-                </div>
-                <div className="d-flex align-items-center">
-                  <GreenCheckmark />
-                  <ProtectedRoute role="FACULTY">
-                    <button
-                      className="btn btn-primary me-2"
-                      onClick={() => handleUpdateAssignment(assignment)}
-                    >
-                      <BsPencil />
-                    </button>
-                  </ProtectedRoute>
-                  <ProtectedRoute role="FACULTY">
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDeleteAssignment(assignment._id)}
-                    >
-                      <BsTrash />
-                    </button>
-                  </ProtectedRoute>
-                </div>
-              </li>
-            )
-          )}
+          {assignmentsForThisCourse.map((assignment: Assignment) => (
+            <li
+              key={assignment._id}
+              className="list-group-item d-flex justify-content-between align-items-center"
+            >
+              <div>
+                <h5 className="mb-1">
+                  <Link
+                    to={`/Kambaz/Courses/${cid}/assignments/${assignment._id}`}
+                    className="text-decoration-none text-dark"
+                  >
+                    {assignment.title}
+                  </Link>
+                </h5>
+                <p className="text-muted mb-1 small">
+                  Due {assignment.dueDate} | {assignment.points} points
+                </p>
+                <p className="text-muted small">
+                  Not available until {assignment.availableFrom}
+                </p>
+              </div>
+              <div className="d-flex align-items-center">
+                <GreenCheckmark />
+                <ProtectedRoute role="FACULTY">
+                  <button
+                    className="btn btn-primary me-2"
+                    onClick={() => handleUpdateAssignment(assignment)}
+                  >
+                    <BsPencil />
+                  </button>
+                </ProtectedRoute>
+                <ProtectedRoute role="FACULTY">
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDeleteAssignment(assignment._id)}
+                  >
+                    <BsTrash />
+                  </button>
+                </ProtectedRoute>
+              </div>
+            </li>
+          ))}
         </ul>
       </div>
 

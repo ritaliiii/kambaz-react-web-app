@@ -2,57 +2,52 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import ProtectedRoute from './Account/ProtectedRoute';
 import { FormControl } from 'react-bootstrap';
-import {
-  enrollCourse,
-  unenrollCourse,
-  toggleShowAllCourses,
-} from './enrollmentActions';
+import { useEffect, useState } from 'react';
+import { enrollCourse, unenrollCourse } from './Enrollments/client';
 
 export default function Dashboard({
-  courses,
+  enrolledCourses,
+  allCourses,
   course,
   setCourse,
   addNewCourse,
   deleteCourse,
   updateCourse,
+  fetchEnrolledCourses,
 }: {
-  courses: any[];
+  enrolledCourses: any[];
+  allCourses: any[];
   course: any;
   setCourse: (course: any) => void;
   addNewCourse: () => void;
-  deleteCourse: (course: any) => void;
+  deleteCourse: (courseId: string) => void;
   updateCourse: () => void;
+  fetchEnrolledCourses: () => void;
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const { enrollments, showAllCourses } = useSelector(
+
+  const { showAllCourses } = useSelector(
     (state: any) => state.enrollmentReducer
-  ); // Added new state
+  );
+  // Added new state
   const dispatch = useDispatch();
 
   // Toggle between showing all courses and enrolled courses
   const handleToggleShowAllCourses = () => {
-    dispatch(toggleShowAllCourses());
+    dispatch({ type: 'TOGGLE_SHOW_ALL_COURSES' });
   };
 
   // Handle enrollment/unenrollment
-  const handleEnrollment = (courseId: string, isEnrolled: boolean) => {
+  const handleEnrollment = async (courseId: string, isEnrolled: boolean) => {
     if (isEnrolled) {
-      dispatch(unenrollCourse(currentUser._id, courseId));
+      await unenrollCourse(currentUser._id, courseId);
     } else {
-      dispatch(enrollCourse(currentUser._id, courseId));
+      await enrollCourse(currentUser._id, courseId);
     }
+    fetchEnrolledCourses();
   };
 
-  // Filter courses based on enrollment status and showAllCourses state
-  const filteredCourses = showAllCourses
-    ? courses
-    : courses.filter((course) =>
-        enrollments.some(
-          (enrollment: any) =>
-            enrollment.user === currentUser._id &&
-            enrollment.course === course._id
-        )
-      );
+  const filteredCourses = showAllCourses ? allCourses : enrolledCourses;
 
   return (
     <div id="wd-dashboard">
@@ -106,10 +101,8 @@ export default function Dashboard({
       <div id="wd-dashboard-courses" className="row">
         <div className="row row-cols-1 row-cols-md-5 g-4">
           {filteredCourses.map((course) => {
-            const isEnrolled = enrollments.some(
-              (enrollment: any) =>
-                enrollment.user === currentUser._id &&
-                enrollment.course === course._id
+            const isEnrolled = enrolledCourses.some(
+              (enrolledCourse) => enrolledCourse._id === course._id
             );
 
             return (
