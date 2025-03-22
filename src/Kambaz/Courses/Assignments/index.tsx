@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
 import { BsPlus, BsPencil, BsTrash } from 'react-icons/bs';
 import { FaSearch } from 'react-icons/fa';
 import GreenCheckmark from '../Modules/GreenCheckmark';
@@ -8,7 +7,6 @@ import ProtectedRoute from '../../Account/ProtectedRoute';
 import { Modal, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import {
-  createAssignment,
   findAssignmentsForCourse,
   updateAssignment,
   deleteAssignment,

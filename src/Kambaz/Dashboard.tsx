@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import ProtectedRoute from './Account/ProtectedRoute';
 import { FormControl } from 'react-bootstrap';
-import { useEffect, useState } from 'react';
 import { enrollCourse, unenrollCourse } from './Enrollments/client';
 
 export default function Dashboard({
