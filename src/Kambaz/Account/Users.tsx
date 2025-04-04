@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 export default function Users() {
   const [users, setUsers] = useState<any[]>([]);
   const [role, setRole] = useState('');
-  const [name, setName] = useState('');
+  const [, setName] = useState('');
   const filterUsersByName = async (name: string) => {
     setName(name);
     if (name) {
