@@ -43,7 +43,7 @@ export default function Dashboard({
     } else {
       await enrollCourse(currentUser._id, courseId);
     }
-    fetchEnrolledCourses();
+    await fetchEnrolledCourses();
   };
 
   const filteredCourses = showAllCourses ? allCourses : enrolledCourses;
@@ -99,7 +99,7 @@ export default function Dashboard({
       <h2 id="wd-dashboard-published">Published Courses</h2> <hr />
       <div id="wd-dashboard-courses" className="row">
         <div className="row row-cols-1 row-cols-md-5 g-4">
-          {filteredCourses.map((course) => {
+          {filteredCourses?.map((course) => {
             const isEnrolled = enrolledCourses.some(
               (enrolledCourse) => enrolledCourse._id === course._id
             );

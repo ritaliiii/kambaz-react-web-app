@@ -14,6 +14,7 @@ import { useSelector } from 'react-redux';
 import Session from './Account/Session';
 import * as userClient from './Account/client';
 import * as courseClient from './Courses/client';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function Kambaz() {
   const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
@@ -21,7 +22,7 @@ export default function Kambaz() {
   // const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const [course, setCourse] = useState<any>({
-    _id: '1234',
+    _id: uuidv4(),
     name: 'New Course',
     number: 'New Number',
     startDate: '2023-09-10',
@@ -29,13 +30,11 @@ export default function Kambaz() {
     description: 'New Description',
   });
   const addNewCourse = async () => {
-    const newCourse = await userClient.createCourse(course);
-    setEnrolledCourses([...enrolledCourses, newCourse]);
-    fetchAllCourses();
-    // dispatch(enrollCourse(currentUser._id, newCourse._id));
+    const newCourse = await courseClient.createCourse(course);
+    setAllCourses([...allCourses, newCourse]);
   };
   const deleteCourse = async (courseId: string) => {
-    // const status = await courseClient.deleteCourse(courseId);
+    const status = await courseClient.deleteCourse(courseId);
     setEnrolledCourses(
       enrolledCourses.filter((course) => course._id !== courseId)
     );
@@ -57,6 +56,7 @@ export default function Kambaz() {
   const fetchEnrolledCourses = async () => {
     try {
       const enrolledCourses = await userClient.findMyCourses();
+      // const enrolledCourses = await courseClient.
       setEnrolledCourses(enrolledCourses);
     } catch (error) {
       console.error(error);
@@ -64,7 +64,8 @@ export default function Kambaz() {
   };
   const fetchAllCourses = async () => {
     try {
-      const allCourses = await userClient.findAllCourses();
+      //TODO
+      const allCourses = await courseClient.fetchAllCourses();
       setAllCourses(allCourses);
     } catch (error) {
       console.error(error);
@@ -74,6 +75,7 @@ export default function Kambaz() {
     fetchEnrolledCourses();
     fetchAllCourses();
   }, [currentUser]);
+
   return (
     <Session>
       <Provider store={store}>

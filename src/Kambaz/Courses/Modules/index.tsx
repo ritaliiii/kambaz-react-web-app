@@ -28,12 +28,12 @@ export default function Modules() {
   useEffect(() => {
     fetchModules();
   }, []);
-  // const createModuleForCourse = async () => {
-  //   if (!cid) return;
-  //   const newModule = { name: moduleName, course: cid };
-  //   const module = await coursesClient.createModuleForCourse(cid, newModule);
-  //   dispatch(addModule(module));
-  // };
+  const createModuleForCourse = async () => {
+    if (!cid) return;
+    const newModule = { name: moduleName, course: cid };
+    const module = await coursesClient.createModuleForCourse(cid, newModule);
+    dispatch(addModule(module));
+  };
   const removeModule = async (moduleId: string) => {
     await modulesClient.deleteModule(moduleId);
     dispatch(deleteModule(moduleId));
@@ -50,10 +50,7 @@ export default function Modules() {
         <ModulesControls
           setModuleName={setModuleName}
           moduleName={moduleName}
-          addModule={() => {
-            dispatch(addModule({ name: moduleName, course: cid }));
-            setModuleName('');
-          }}
+          addModule={createModuleForCourse}
         />
       </ProtectedRoute>
       <br />

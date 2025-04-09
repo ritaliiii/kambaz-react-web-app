@@ -34,10 +34,10 @@ export const findMyCourses = async () => {
   );
   return data;
 };
-export const findAllCourses = async () => {
-  const { data } = await axiosWithCredentials.get(`${USERS_API}/all/courses`);
-  return data;
-};
+// export const findAllCourses = async () => {
+//   const { data } = await axiosWithCredentials.get(`${USERS_API}/all/courses`);
+//   return data;
+// };
 export const createCourse = async (course: any) => {
   const { data } = await axiosWithCredentials.post(
     `${USERS_API}/current/courses`,
@@ -67,5 +67,11 @@ export const deleteUser = async (userId: string) => {
 };
 export const createUser = async (user: any) => {
   const response = await axios.post(`${USERS_API}`, user);
+  return response.data;
+};
+export const findCoursesForUser = async (userId: string) => {
+  const response = await axiosWithCredentials.get(
+    `${USERS_API}/${userId}/courses`
+  );
   return response.data;
 };
