@@ -8,8 +8,6 @@ import { useState, useEffect } from 'react';
 import store from './store';
 import { Provider } from 'react-redux';
 import ProtectedRoute from './Account/ProtectedRoute';
-// import { enrollCourse } from './enrollmentActions';
-// import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import Session from './Account/Session';
 import * as userClient from './Account/client';
@@ -34,7 +32,7 @@ export default function Kambaz() {
     setAllCourses([...allCourses, newCourse]);
   };
   const deleteCourse = async (courseId: string) => {
-    const status = await courseClient.deleteCourse(courseId);
+    await courseClient.deleteCourse(courseId);
     setEnrolledCourses(
       enrolledCourses.filter((course) => course._id !== courseId)
     );
