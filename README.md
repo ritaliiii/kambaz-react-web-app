@@ -1,50 +1,41 @@
-# React + TypeScript + Vite
+# Frontend: MERN Stack Web Application (Vite + TypeScript + React.js)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the **frontend** of a full-stack MERN application, built with **React.js** and **Vite** for a modern, fast, and interactive user experience. It features a **canvas-like interface** and a responsive layout.
 
-Currently, two official plugins are available:
+<img width="1080" height="638" alt="Screenshot 2025-07-17 at 08 37 33" src="https://github.com/user-attachments/assets/062008dc-229f-4314-92cd-c07fafd2c23c" />
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Features
 
-- Configure the top-level `parserOptions` property like this:
+- Fast development and hot module replacement with **Vite**
+- Built with **React.js**
+- Component-based **SPA (Single-Page Application)**
+- Responsive UI using **Bootstrap**
+- Client-side routing with **React Router**
+- State management with **Redux**
+- RESTful API calls to backend via **Axios**
+- Interactive **canvas-style UI**
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Tech Stack
+
+- **Vite** (frontend build tool)
+- **React.js**
+- **Redux** (for global state)
+- **React Router**
+- **Bootstrap** & **CSS3**
+- **Axios** (for REST API integration)
+
+## Getting Started
+
+### 1. Install dependencies
+```bash
+npm install
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+### 2. Start development server
+```bash
+npm run dev
 ```
+Open in browser: [http://localhost:5173](http://localhost:5173)
